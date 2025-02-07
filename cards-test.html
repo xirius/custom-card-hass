@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Custom Card</title>
+  <link rel="stylesheet" href="https://cdn.materialdesignicons.com/6.5.95/css/materialdesignicons.min.css"/>
+  <style>
+    body {  
+      background-color: #FAFAFA;  
+    }  
+  </style>
+  <script type="module">
+    if (!customElements.get("ha-icon")) {
+      class HaIcon extends HTMLElement {
+        connectedCallback() {
+          let icon = this.getAttribute("icon") || "";
+          // Replace colon with dash for proper MDI class naming.
+          icon = icon.replace(":", "-");
+          this.innerHTML = `<i class="mdi ${icon}" style="font-size:24px; display:inline-block; line-height: 24px; color:black"></i>`;
+        }
+      }
+      customElements.define("ha-icon", HaIcon);
+    }
+  </script>
+</head>
+<body>
+  <div>RUN: Python web server!: python3 -m http.server</div>
+  <div id="test-container"></div>
+
+  <!-- 1) Load the custom card code (defines "my-custom-card") -->
+  <script type="module" src="./asv-room-heating.js"></script>
+
+  <!-- 2) After the above script finishes, create the element -->
+  <script type="module">
+    const card = document.createElement("asv-thermostat-card");
+
+    // (Optional) Provide config object, if your card uses setConfig
+    card.setConfig({
+      room_name: 'Kitchen',
+      temp_entity: 'temp',
+      humidity_entity: 'humidity',
+      climate_entity: 'climate',
+      entity: 'sensor.example',
+      title: 'Testing My Card'
+    });
+
+    // Optional: Provide a mock "hass" object
+    // This won't replicate all Home Assistant features,
+    // but you can stub out just enough to test your UI.
+    const mockHass = {
+      states: {
+        'room_name': 'Kitchen',
+        'temp_entity': 'temp',
+        'humidity_entity': 'humidity',
+        'climate_entity': 'climate',
+        'sensor.time': { state: '10:00', attributes: {} },
+        'sensor.example': { state: '42', attributes: { friendly_name: 'My Sensor' } }
+      },
+      // Provide any other mock data or methods your card uses
+      user: { name: 'Test User' },
+      callService(domain, service, data) {
+        console.log(`Mock service call: ${domain}.${service}`, data);
+      }
+    };
+
+    // "Set" the hass object on your custom card
+    card.hass = mockHass;
+
+    document.getElementById("test-container").appendChild(card);
+  </script>
+</body>
+</html>
